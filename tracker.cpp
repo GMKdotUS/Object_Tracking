@@ -105,8 +105,8 @@ int main(int argc, char* argv[])
 		cvCvtColor(p_imgOriginal, p_imgHSV, CV_BGR2HSV);
 
 		cvInRangeS(p_imgHSV,				// function input
-				   cvScalar(38,  60,  70),			// min filtering value (if color is greater than or equal to this)
-				   cvScalar(75, 181, 256),			// max filtering value (if color is less than this)
+				   cvScalar(54,  0,  244),			// min filtering value (if color is greater than or equal to this)
+				   cvScalar(84, 23, 256),			// max filtering value (if color is less than this)
 				   p_imgProcessed);				// function output
 
 		p_strStorage = cvCreateMemStorage(0);	// allocate necessary memory storage variable to pass into cvHoughCircles()
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
                 int _biggest;
                 float _biggestX;
                 float _biggestY;
-                int _biggestRadius;
+                float _biggestRadius;
                 
 		// Run this if the camera can see at least one circle
 		for(i=0; i < p_seqCircles->total; i++) {		// for each element in sequential circles structure (i.e. for each object detected)
@@ -153,11 +153,13 @@ int main(int argc, char* argv[])
 			printf("ball position x = %f, y = %f, r = %f \n", p_fltXYRadius[0],	// x position of center point of circle
 									  p_fltXYRadius[1],	// y position of center point of circle
 									  p_fltXYRadius[2]);	// radius of circle
-                if (_biggestRadius < p_fltXYRadius[2]) || (total = 1){
+
+
+                if ((_biggestRadius < p_fltXYRadius[2]) || (p_seqCircles->total = 1)){
                 	_biggest = i;
                 	_biggestX = p_fltXYRadius[0];
                 	_biggestY = p_fltXYRadius[1];
-                	_biggesRadius = p_fltXYRadius[2];
+                	_biggestRadius = p_fltXYRadius[2];
                 }
 
 
