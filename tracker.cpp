@@ -14,7 +14,7 @@
 int main(int argc, char* argv[])
 {
 	// Setup serial port connection and needed variables.
-	HANDLE hSerial = CreateFile(L"COM3", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	HANDLE hSerial = CreateFile(L"COM4", GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
 	if (hSerial !=INVALID_HANDLE_VALUE)
     {
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
         DCB dcbSerialParams;
         GetCommState(hSerial,&dcbSerialParams);
 
-        dcbSerialParams.BaudRate = CBR_9600;
+        dcbSerialParams.BaudRate = CBR_57600;
         dcbSerialParams.ByteSize = 8;
         dcbSerialParams.Parity = NOPARITY;
         dcbSerialParams.StopBits = ONESTOPBIT;
@@ -122,8 +122,8 @@ int main(int argc, char* argv[])
 									  2,					// size of image / 2 = "accumulator resolution", i.e. accum = res = size of image / 2
 									  p_imgProcessed->height / 4,	// min distance in pixels between the centers of the detected circles
 									  100,						// high threshold of Canny edge detector, called by cvHoughCircles
-									  50,						// low threshold of Canny edge detector, called by cvHoughCircles
-									  10,	 //10					// min circle radius, in pixels
+									  10,						// low threshold of Canny edge detector, called by cvHoughCircles
+									  1,	 //10					// min circle radius, in pixels
 									  400);						// max circle radius, in pixels
 
 		// Run this if the camera doesn't detect any circles
