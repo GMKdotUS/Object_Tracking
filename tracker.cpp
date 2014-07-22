@@ -59,9 +59,9 @@ int main(int argc, char* argv[])
 										// call cvGetSeqElem(p_seqCircles, i) will return a 3 element array of the ith circle (see next variable)
 	
 	float* p_fltXYRadius;				// pointer to a 3 element array of floats
-										// [0] => x position of detected object
-										// [1] => y position of detected object
-										// [2] => radius of detected object
+							// [0] => x position of detected object
+							// [1] => y position of detected object
+							// [2] => radius of detected object
 
 	int i;								// loop counter
 	char charCheckForEscKey;			// char for checking key press (Esc exits program)
@@ -85,8 +85,11 @@ int main(int argc, char* argv[])
 	p_imgHSV = cvCreateImage(size640x480, IPL_DEPTH_8U, 3); 
 
 	// Variables for Arduino Control
-	int servoPosition = 90;
-	int servoOrientation = 0;
+//	int servoPosition = 90;
+        int panPosition = 350;
+        int tiltPosition = 200;
+        
+	//int servoOrientation = 0;
 
 	// Main program loop
 	while(1) {								// for each frame . . .
@@ -129,91 +132,41 @@ int main(int argc, char* argv[])
 		// Run this if the camera doesn't detect any circles
 		if (p_seqCircles->total == 0)
 		{
-			// Initialize orientation
-			// This just makes it so the camera first goes to the side that it's leaning towards
-			// So if the camera is already mostly facing the left side it goes to the left end
-			// before going to the right. And the other way around.
-			if (servoOrientation == 0)
-			{
-				if (servoPosition >= 90)
-					servoOrientation = 1;
-				else
-					servoOrientation = -1;
-			}
+			// go to image centered point (350, 200)
 
-			if (servoOrientation == 1)
-			{
-				outputChars[0] = 'l';
-				WriteFile(hSerial, outputChars, strlen(outputChars), &btsIO, NULL);
 
-				// This code is identical to the one on the Arduino side
-				servoPosition+=5;
 
-				if (servoPosition > 180)
-				{
-					servoPosition = 180;
-					servoOrientation = -1;
-				}
-			}
-			else
-			{
-				outputChars[0] = 'r';
-				WriteFile(hSerial, outputChars, strlen(outputChars), &btsIO, NULL);
 
-				// This code is identical to the one on the Arduino side
-				servoPosition-=5;
-
-				if (servoPosition < 0)
-				{
-					servoPosition = 0;
-					servoOrientation = 1;
-				}
-			}
 		}
 
+               // Remember the bigger target
+                int _biggest;
+                float _biggestX;
+                float _biggestY;
+                int _biggestRadius;
+                
 		// Run this if the camera can see at least one circle
 		for(i=0; i < p_seqCircles->total; i++) {		// for each element in sequential circles structure (i.e. for each object detected)
 
 			p_fltXYRadius = (float*)cvGetSeqElem(p_seqCircles, i);	// from the sequential structure, read the ith value into a pointer to a float
 
-			printf("ball position x = %f, y = %f, r = %f \n", p_fltXYRadius[0],		// x position of center point of circle
-															  p_fltXYRadius[1],		// y position of center point of circle
-															  p_fltXYRadius[2]);	// radius of circle
+			printf("ball position x = %f, y = %f, r = %f \n", p_fltXYRadius[0],	// x position of center point of circle
+									  p_fltXYRadius[1],	// y position of center point of circle
+									  p_fltXYRadius[2]);	// radius of circle
+                if (_biggestRadius < p_fltXYRadius[2]) || (total = 1){
+                	_biggest = i;
+                	_biggestX = p_fltXYRadius[0];
+                	_biggestY = p_fltXYRadius[1];
+                	_biggesRadius = p_fltXYRadius[2];
+                }
 
-			// Reset servo orientation as the camera now has focus of a circle
-			// Servo orientation is important only when the camera doesn't see a circle
-			servoOrientation = 0;
-
-			// Check whether camera should turn to its left if the circle gets near the right end of the screen
-			if (p_fltXYRadius[0] > 540)
-			{
-				outputChars[0] = 'l';
-				WriteFile(hSerial, outputChars, strlen(outputChars), &btsIO, NULL);
-
-				servoPosition+=5;
-
-				if (servoPosition > 180)
-					servoPosition = 180;
-			}
-
-			// Check whether camera should turn to its right if the circle gets near the left end of the screen
-			if (p_fltXYRadius[0] < 100)
-			{
-				outputChars[0] = 'r';
-				WriteFile(hSerial, outputChars, strlen(outputChars), &btsIO, NULL);
-
-				servoPosition-=5;
-
-				if (servoPosition < 0)
-					servoPosition = 0;
-			}
 
 										// draw a small green circle at center of detected object
-			cvCircle(p_imgOriginal,										// draw on the original image
+			cvCircle(p_imgOriginal,									// draw on the original image
 					 cvPoint(cvRound(p_fltXYRadius[0]), cvRound(p_fltXYRadius[1])),		// center point of circle
 					 3,													// 3 pixel radius of circle
-					 CV_RGB(0,255,0),									// draw pure green
-					 CV_FILLED);										// thickness, fill in the circle
+					 CV_RGB(0,255,0),							// draw pure green
+					 CV_FILLED);								// thickness, fill in the circle
 			
 										// draw a red circle around the detected object
 			cvCircle(p_imgOriginal,										// draw on the original image
@@ -222,6 +175,15 @@ int main(int argc, char* argv[])
 					 CV_RGB(255,0,0),									// draw pure red
 					 3);												// thickness of circle in pixels
 		}	// end for
+		
+		//send coordinates through serial
+			outputChars[0] = 'l';
+		//send _biggestX, _biggestY "000,000"
+	               WriteFile(hSerial, outputChars, strlen(outputChars), &btsIO, NULL);
+	               
+	        //wait for response from arduino
+	        
+	        
 
 		cvShowImage("Original", p_imgOriginal);			// original image with detectec ball overlay
 		cvShowImage("Processed", p_imgProcessed);		// image after processing
