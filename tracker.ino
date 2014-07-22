@@ -7,7 +7,7 @@ int incomingByte = 0;   // for incoming serial data
 
 void setup()
 {
-  Serial.begin(9600); // // opens serial port, sets data rate to 9600 bps
+  Serial.begin(57600); // // opens serial port, sets data rate to 9600 bps
   
   servo.attach(5); // attaches the servo on pin 5 to the servo object
   servo.write(servoPosition); // set the servo at the mid position
